@@ -1,0 +1,106 @@
+classdef MBDTool < matlab.apps.AppBase
+
+    % GUI Components
+    properties (Access = public)
+        ui_figure            matlab.ui.Figure
+        button_group_panel   matlab.ui.container.Panel
+        add_sink_button      matlab.ui.control.Button
+        add_inport_button    matlab.ui.control.Button
+        add_outport_button   matlab.ui.control.Button
+        add_terminator_button matlab.ui.control.Button
+        add_goto_button       matlab.ui.control.Button
+        add_from_button       matlab.ui.control.Button
+        add_cast_goto_button  matlab.ui.control.Button
+        add_from_cast_button  matlab.ui.control.Button
+        add_to_workspace_button matlab.ui.control.Button
+        input_suffix_field      matlab.ui.control.EditField
+        submit_suffix_button    matlab.ui.control.Button
+        status_text_area        matlab.ui.control.TextArea
+        clear_status_button     matlab.ui.control.Button
+    end
+
+    properties (Access = public)
+        suffix = '';
+        remove_suffix = false;
+    end
+
+    methods (Access = public)
+        % Constructor
+        function app = MBDTool
+            % Create the main figure
+            app.ui_figure = uifigure('Name', 'MBD Tool', ...
+                'Position', [100, 100, 320, 550], ...
+                'Resize', 'off', 'WindowStyle', 'modal');
+
+            % Create a panel for buttons
+            app.button_group_panel = uipanel(app.ui_figure, ...
+                'Title', 'Functionality', ...
+                'Position', [10, 180, 300, 350]);
+
+            % Add buttons
+            button_positions = [
+                [10, 290, 120, 30]; [160, 290, 120, 30];
+                [10, 240, 120, 30]; [160, 240, 120, 30];
+                [10, 190, 120, 30]; [160, 190, 120, 30];
+                [10, 140, 120, 30]; [160, 140, 120, 30];
+                [10, 90, 120, 30]; [160, 90, 120, 30];
+                ];
+
+            button_labels = {
+                '🔌 Inport', '🔋 Outport', ...
+                '⬅️ Goto', '➡️ From', ...
+                '🎥⬅️ Cast➡Goto', '➡️🎥 From➡Cast', ...
+                '📊 Scope', '📺 Display', ...
+                '💾 To Workspace', '🛑 Terminate'
+                };
+
+            tags = {
+                'inport', 'outport',...
+                'goto', 'from',...
+                'cast_goto', 'from_cast',...
+                'scope', 'display',...
+                'tws', 'terminate'
+                };
+
+            button_callbacks = {
+                @(src, event)MBDToolFunctions.add_inport(src, event, app), @(src, event)MBDToolFunctions.add_outport(src, event, app), ...
+                @(src, event)MBDToolFunctions.add_goto(src, event, app), @(src, event)MBDToolFunctions.add_from(src, event, app), ...
+                @(src, event)MBDToolFunctions.add_goto(src, event, app), @(src, event)MBDToolFunctions.add_from(src, event, app), ...
+                @(src, event)MBDToolFunctions.add_scope(src, event, app), @(src, event)MBDToolFunctions.add_display(src, event, app), ...
+                @(src, event)MBDToolFunctions.add_to_workspace(src, event, app), @(src, event)MBDToolFunctions.add_terminator(src, event, app)
+                };
+
+            for i = 1:numel(button_labels)
+                uibutton(app.button_group_panel, ...
+                    'Text', button_labels{i}, ...
+                    'Tag', tags{i}, ...
+                    'Position', button_positions(i, :), ...
+                    'ButtonPushedFcn', button_callbacks{i});
+            end
+
+            % Suffix input field
+            app.input_suffix_field = uieditfield(app.button_group_panel, 'text', ...
+                'Placeholder', 'Enter suffix...', ...
+                'Position', [10, 40, 180, 30]);
+
+            % Submit suffix button
+            app.submit_suffix_button = uibutton(app.button_group_panel, ...
+                'Text', 'Submit', ...
+                'Position', [200, 40, 80, 30], ...
+                'ButtonPushedFcn', @(src, event)MBDToolFunctions.submit_suffix(src, event, app));
+
+            % Add text area for status messages
+            app.status_text_area = uitextarea(app.ui_figure, ...
+                'Editable', 'off', ...
+                'Position', [10, 80, 230, 80], ...
+                'Value', {'Status messages will appear here...'});
+
+            % Clear status messages button
+            app.clear_status_button = uibutton(app.ui_figure, ...
+                'Text', '❌ Clear', ...
+                'Position', [250, 110, 60, 30], ...
+                'ButtonPushedFcn', @(src, event)set(app.status_text_area, ...
+                'Value', {''}, 'BackgroundColor', 'w'));
+        end
+    end
+end
