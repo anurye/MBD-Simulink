@@ -1,26 +1,23 @@
 function submit_suffix(~, ~, app)
-% Retrieve the suffix value from the input field
+% Retrieve the suffix
 suffix = strtrim(app.input_suffix_field.Value);
 
-% Update suffix
+% Update suffix property
 app.suffix = suffix;
 
-% Update append (true if the suffix is to be appended, false for removing)
-answer = questdlg('What would you like to do?', ...
-    'Options', ...
-    'Append Suffix', 'Remove Suffix', 'Append Suffix');
-% Handle response
-switch answer
-    case {'Append Suffix', ''}
+% Determine action from dropdown
+selected_action = app.action_dropdown.Value;
+switch selected_action
+    case 'Append'
         app.remove_suffix = false;
-    case 'Remove Suffix'
+    case 'Remove'
         app.remove_suffix = true;
 end
 
-% Clear the input field after submission
+% Clear the input field
 app.input_suffix_field.Value = "";
 
-% Update status message
-MBDToolFunctions.update_status(app, ['Suffix submitted: "', suffix, '"'], ...
-    'type', 'info');
+% Update status
+MBDToolFunctions.update_status(app, ...
+    ['Suffix "', suffix, '" submitted for ', selected_action], 'type', 'info');
 end
